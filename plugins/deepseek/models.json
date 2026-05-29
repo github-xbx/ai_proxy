@@ -1,0 +1,14 @@
+[
+  {
+    "claudeModel": "claude-3-5-sonnet-20241022",
+    "actualModel": "deepseek-chat",
+    "supportsStreaming": true,
+    "maxTokens": 4096
+  },
+  {
+    "claudeModel": "claude-3-opus-20240229",
+    "actualModel": "deepseek-reasoner",
+    "supportsStreaming": true,
+    "maxTokens": 4096
+  }
+]

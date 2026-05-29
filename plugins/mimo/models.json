@@ -1,0 +1,8 @@
+[
+  {
+    "claudeModel": "claude-3-5-sonnet-20241022",
+    "actualModel": "mimo-chat",
+    "supportsStreaming": true,
+    "maxTokens": 4096
+  }
+]
