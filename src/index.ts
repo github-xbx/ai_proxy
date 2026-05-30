@@ -23,7 +23,7 @@ async function main(): Promise<void> {
 
   logger.info('AI Proxy server is ready');
   logger.info('Configure Claude Desktop with:');
-  logger.info(`  ANTHROPIC_BASE_URL=http://${config.server.host}:${config.server.port}`);
+  logger.info(`ANTHROPIC_BASE_URL=http://${config.server.host}:${config.server.port}`);
 }
 
 main().catch((error) => {

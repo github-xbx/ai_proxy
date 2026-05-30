@@ -12,10 +12,14 @@ interface RawPluginConfig {
 
 dotenv.config();
 
+/**
+ * 配置管理
+ */
 export class ConfigManager {
   private config: AppConfig;
 
   constructor(configPath: string) {
+    //读取文件内容 并解析yaml格式
     const fileContent = fs.readFileSync(configPath, 'utf-8');
     const rawConfig = yaml.parse(fileContent);
 

@@ -1,3 +1,11 @@
+/*==========================================*/
+/*                自定以类型                 */
+/*==========================================*/
+
+
+/**
+ * 模型配置
+ */
 export interface ModelConfig {
   claudeModel: string;
   actualModel: string;
@@ -6,6 +14,10 @@ export interface ModelConfig {
   supportsStreaming?: boolean;
 }
 
+/**
+ * 插件配置，
+ * 插件试集成
+ */
 export interface PluginConfig {
   name: string;
   baseUrl: string;
@@ -13,11 +25,17 @@ export interface PluginConfig {
   models: ModelConfig[];
 }
 
+/**
+ * 服务配置
+ */
 export interface ServerConfig {
   port: number;
   host: string;
 }
 
+/**
+ * 日志配置
+ */
 export interface LoggingConfig {
   level: 'debug' | 'info' | 'warn' | 'error';
   console: boolean;
@@ -27,6 +45,9 @@ export interface LoggingConfig {
   retentionDays: number;
 }
 
+/**
+ * models.yaml 配置实体
+ */
 export interface AppConfig {
   server: ServerConfig;
   logging: LoggingConfig;
