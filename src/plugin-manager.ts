@@ -4,6 +4,9 @@ import { ConfigManager } from './config';
 import { AIPlugin } from '../plugin-sdk/types';
 import { ModelConfig } from './types';
 
+/**
+ * 配置管理
+ */
 export class PluginManager {
   private plugins: Map<string, AIPlugin> = new Map();
   private config: ConfigManager;
