@@ -5,8 +5,14 @@ import { Router } from './router';
 import { Server } from './server';
 import { Logger } from './utils/logger';
 
+function getAppDir(): string {
+  // Use cwd for both packaged app and development
+  return process.cwd();
+}
+
 async function main(): Promise<void> {
-  const configPath = path.join(__dirname, '../config/models.yaml');
+  const appDir = getAppDir();
+  const configPath = path.join(appDir, 'config', 'models.yaml');
 
   const configManager = new ConfigManager(configPath);
   const config = configManager.getConfig();

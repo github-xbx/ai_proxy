@@ -13,7 +13,7 @@ export class PluginManager {
   }
 
   async discoverPlugins(): Promise<void> {
-    const pluginsDir = path.join(__dirname, '../plugins');
+    const pluginsDir = path.join(process.cwd(), 'plugins');
 
     if (!fs.existsSync(pluginsDir)) {
       console.warn('Plugins directory not found');

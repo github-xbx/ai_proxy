@@ -29,9 +29,46 @@ cp .env.example .env
 编辑 `.env` 文件：
 
 ```env
-DEEPSEEK_API_KEY=sk-your-deepseek-api-key
+# ============================================================
+# API Keys - 请填入你自己的 API Key
+# ============================================================
+
+# DeepSeek API Key
+# 获取地址: https://platform.deepseek.com/api_keys
+# 1. 注册/登录 DeepSeek 开放平台
+# 2. 进入 "API Keys" 页面
+# 3. 点击 "创建 API Key"
+# 4. 复制 sk- 开头的密钥粘贴到下面
+DEEPSEEK_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# 小米 MiMo API Key
+# 获取地址: https://mimo.xiaomi.com/
+# 1. 注册/登录小米大模型平台
+# 2. 进入 API 管理页面
+# 3. 创建新的 API Key
+# 4. 复制粘贴到下面
 MIMO_API_KEY=your-mimo-api-key
+
+# OpenAI 兼容接口（可选，如 GPT-4、Claude 等）
+OPENAI_COMPAT_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx
+OPENAI_COMPAT_BASE_URL=https://api.openai.com/v1
+OPENAI_COMPAT_MODEL=gpt-4
+
+# ============================================================
+# 服务器配置
+# ============================================================
+PORT=3000
+HOST=0.0.0.0
+
+# ============================================================
+# 日志配置
+# ============================================================
+LOG_LEVEL=info
+LOG_TO_FILE=true
+LOG_DIR=./logs
 ```
+
+> ⚠️ **注意**: `.env` 文件包含敏感信息，不要提交到 Git！
 
 ### 3. 启动代理服务器
 
