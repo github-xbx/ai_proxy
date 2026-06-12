@@ -18,7 +18,7 @@
     "deepseek",
     "mimo"
   ],
-  "author": "",
+  "author": "xingbingxuan",
   "license": "MIT",
   "dependencies": {
     "cors": "^2.8.5",

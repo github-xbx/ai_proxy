@@ -12,8 +12,8 @@ describe('ConfigManager', () => {
 
     expect(config.server.port).toBe(3000);
     expect(config.server.host).toBe('localhost');
-    expect(config.plugins.deepseek).toBeDefined();
-    expect(config.plugins.mimo).toBeDefined();
+    expect(config.routes['claude-sonnet-4-5']).toBeDefined();
+    expect(config.routes['claude-sonnet-4-6']).toBeDefined();
   });
 
   test('should resolve environment variables', () => {
@@ -22,30 +22,31 @@ describe('ConfigManager', () => {
     const configPath = path.join(__dirname, '../../config/models.yaml');
     const configManager = new ConfigManager(configPath);
 
-    const pluginConfig = configManager.getPluginConfig('deepseek');
-    expect(pluginConfig?.apiKey).toBe('test-key');
+    const route = configManager.getRoute('claude-sonnet-4-5');
+    expect(route?.apiKey).toBe('test-key');
 
     delete process.env.DEEPSEEK_API_KEY;
   });
 
-  test('should get plugin config by name', () => {
+  test('should get route config by claude model name', () => {
     const configPath = path.join(__dirname, '../../config/models.yaml');
     const configManager = new ConfigManager(configPath);
 
-    const deepseekConfig = configManager.getPluginConfig('deepseek');
-    expect(deepseekConfig?.name).toBe('deepseek');
-    expect(deepseekConfig?.baseUrl).toBe('https://api.deepseek.com/v1');
+    const route = configManager.getRoute('claude-sonnet-4-5');
+    expect(route?.targetModel).toBe('deepseek-v4-pro[1m]');
+    expect(route?.protocol).toBe('anthropic');
+    expect(route?.baseUrl).toBe('https://api.deepseek.com/anthropic');
   });
 
-  test('should return undefined for unknown plugin', () => {
+  test('should return undefined for unknown model', () => {
     const configPath = path.join(__dirname, '../../config/models.yaml');
     const configManager = new ConfigManager(configPath);
 
-    const unknownConfig = configManager.getPluginConfig('unknown');
-    expect(unknownConfig).toBeUndefined();
+    const route = configManager.getRoute('unknown-model');
+    expect(route).toBeUndefined();
   });
 
-  test('should exclude disabled plugins from config', () => {
+  test('should parse routes from yaml', () => {
     const tmpFile = path.join(os.tmpdir(), `config-test-${Date.now()}.yaml`);
     fs.writeFileSync(tmpFile, [
       'server:',
@@ -53,28 +54,21 @@ describe('ConfigManager', () => {
       '  host: localhost',
       'logging:',
       '  level: info',
-      'plugins:',
-      '  enabled-plugin:',
-      '    enabled: true',
-      '    baseUrl: https://enabled.example.com',
-      '    apiKey: key1',
-      '    models:',
-      '      - claudeModel: claude-3',
-      '        actualModel: gpt-4',
-      '  disabled-plugin:',
-      '    enabled: false',
-      '    baseUrl: https://disabled.example.com',
-      '    apiKey: key2',
-      '    models:',
-      '      - claudeModel: claude-3',
-      '        actualModel: gpt-4',
+      'routes:',
+      '  claude-test:',
+      '    targetModel: gpt-4',
+      '    protocol: openai',
+      '    baseUrl: https://api.example.com',
+      '    apiKey: test-key',
+      '    streaming: true',
       ''].join('\n'), 'utf-8');
 
     const configManager = new ConfigManager(tmpFile);
     fs.unlinkSync(tmpFile);
 
-    const plugins = configManager.getPlugins();
-    expect(plugins['enabled-plugin']).toBeDefined();
-    expect(plugins['disabled-plugin']).toBeUndefined();
+    const routes = configManager.getRoutes();
+    expect(routes['claude-test']).toBeDefined();
+    expect(routes['claude-test'].targetModel).toBe('gpt-4');
+    expect(routes['claude-test'].protocol).toBe('openai');
   });
 });

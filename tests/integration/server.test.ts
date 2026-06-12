@@ -1,6 +1,5 @@
 import { Server } from '../../src/server';
 import { ConfigManager } from '../../src/config';
-import { PluginManager } from '../../src/plugin-manager';
 import { Router } from '../../src/router';
 import { Logger } from '../../src/utils/logger';
 import path from 'path';
@@ -13,12 +12,10 @@ describe('Server Integration', () => {
   beforeAll(async () => {
     const configPath = path.join(__dirname, '../../config/models.yaml');
     const configManager = new ConfigManager(configPath);
-    const pluginManager = new PluginManager(configManager);
-    await pluginManager.discoverPlugins();
 
     const logger = new Logger(configManager.getConfig().logging);
-    const router = new Router(pluginManager);
-    server = new Server(configManager, pluginManager, router, logger);
+    const router = new Router(configManager);
+    server = new Server(configManager, router, logger);
     app = server.getApp();
   });
 

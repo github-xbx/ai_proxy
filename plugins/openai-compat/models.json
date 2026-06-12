@@ -1,8 +1,0 @@
-[
-  {
-    "claudeModel": "claude-3-5-sonnet-20241022",
-    "actualModel": "gpt-4",
-    "supportsStreaming": true,
-    "maxTokens": 4096
-  }
-]

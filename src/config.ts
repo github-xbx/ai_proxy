@@ -1,28 +1,38 @@
 import fs from 'fs';
 import yaml from 'yaml';
 import dotenv from 'dotenv';
-import { AppConfig, PluginConfig } from './types';
+import { AppConfig, RouteConfig } from './types';
 
-interface RawPluginConfig {
-  enabled?: boolean;
+/**
+ * YAML 中的原始路由配置（未解析环境变量）
+ */
+interface RawRouteConfig {
+  targetModel?: string;
+  protocol?: string;
   baseUrl?: string;
   apiKey?: string;
-  models?: any[];
+  streaming?: boolean;
 }
 
+// 加载 .env 环境变量
 dotenv.config();
 
 /**
- * 配置管理
+ * 配置管理器
+ * 负责读取 models.yaml 并解析为 AppConfig，支持 ${ENV_VAR} 环境变量替换
  */
 export class ConfigManager {
   private config: AppConfig;
 
+  /**
+   * @param configPath models.yaml 文件路径
+   */
   constructor(configPath: string) {
-    //读取文件内容 并解析yaml格式
+    // 读取并解析 YAML 配置文件
     const fileContent = fs.readFileSync(configPath, 'utf-8');
     const rawConfig = yaml.parse(fileContent);
 
+    // 构建基础配置
     this.config = {
       server: {
         port: parseInt(process.env.PORT || rawConfig.server?.port?.toString() || '3000'),
@@ -36,23 +46,26 @@ export class ConfigManager {
         filePattern: rawConfig.logging?.filePattern || 'ai-proxy-%DATE%.log',
         retentionDays: rawConfig.logging?.retentionDays || 7
       },
-      plugins: {}
+      routes: {}
     };
 
-    for (const [name, pluginRaw] of Object.entries(rawConfig.plugins || {})) {
-      const plugin = pluginRaw as RawPluginConfig;
+    // 遍历 routes 配置，解析环境变量并填充默认值
+    for (const [claudeModel, routeRaw] of Object.entries(rawConfig.routes || {})) {
+      const route = routeRaw as RawRouteConfig;
 
-      if (plugin.enabled !== false) {
-        this.config.plugins[name] = {
-          name,
-          baseUrl: this.resolveEnvVars(plugin.baseUrl),
-          apiKey: this.resolveEnvVars(plugin.apiKey),
-          models: plugin.models || []
-        };
-      }
+      this.config.routes[claudeModel] = {
+        targetModel: route.targetModel || claudeModel,
+        protocol: (route.protocol as RouteConfig['protocol']) || 'anthropic',
+        baseUrl: this.resolveEnvVars(route.baseUrl),
+        apiKey: this.resolveEnvVars(route.apiKey),
+        streaming: route.streaming !== false
+      };
     }
   }
 
+  /**
+   * 替换字符串中的 ${ENV_VAR} 为实际环境变量值
+   */
   private resolveEnvVars(value: string | undefined): string {
     if (!value) return '';
 
@@ -61,15 +74,25 @@ export class ConfigManager {
     });
   }
 
+  /**
+   * 获取完整配置
+   */
   getConfig(): AppConfig {
     return this.config;
   }
 
-  getPluginConfig(pluginName: string): PluginConfig | undefined {
-    return this.config.plugins[pluginName];
+  /**
+   * 根据 Claude 模型名查找路由配置
+   * @param claudeModel Claude 模型名称（如 claude-sonnet-4-5）
+   */
+  getRoute(claudeModel: string): RouteConfig | undefined {
+    return this.config.routes[claudeModel];
   }
 
-  getPlugins(): Record<string, PluginConfig> {
-    return this.config.plugins;
+  /**
+   * 获取所有路由配置
+   */
+  getRoutes(): Record<string, RouteConfig> {
+    return this.config.routes;
   }
 }

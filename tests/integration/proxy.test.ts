@@ -1,6 +1,5 @@
 import { Server } from '../../src/server';
 import { ConfigManager } from '../../src/config';
-import { PluginManager } from '../../src/plugin-manager';
 import { Router } from '../../src/router';
 import { Logger } from '../../src/utils/logger';
 import path from 'path';
@@ -17,12 +16,10 @@ describe('Proxy Integration', () => {
   beforeAll(async () => {
     const configPath = path.join(__dirname, '../../config/models.yaml');
     const configManager = new ConfigManager(configPath);
-    const pluginManager = new PluginManager(configManager);
-    await pluginManager.discoverPlugins();
 
     const logger = new Logger({ ...configManager.getConfig().logging, file: false });
-    const router = new Router(pluginManager);
-    server = new Server(configManager, pluginManager, router, logger);
+    const router = new Router(configManager);
+    server = new Server(configManager, router, logger);
     app = server.getApp();
   });
 
@@ -30,20 +27,15 @@ describe('Proxy Integration', () => {
     mockFetch.mockReset();
   });
 
-  test('should handle non-streaming request', async () => {
+  test('should handle non-streaming request via anthropic protocol', async () => {
     const mockResponseBody = {
-      id: 'chatcmpl-test',
-      object: 'chat.completion',
-      created: Date.now(),
-      model: 'deepseek-chat',
-      choices: [
-        {
-          index: 0,
-          message: { role: 'assistant', content: 'Hello! How can I help you?' },
-          finish_reason: 'stop'
-        }
-      ],
-      usage: { prompt_tokens: 10, completion_tokens: 8, total_tokens: 18 }
+      id: 'msg-test',
+      type: 'message',
+      role: 'assistant',
+      content: [{ type: 'text', text: 'Hello! How can I help you?' }],
+      model: 'deepseek-v4-pro[1m]',
+      stop_reason: 'end_turn',
+      usage: { input_tokens: 10, output_tokens: 8 }
     };
 
     mockFetch.mockResolvedValueOnce({
@@ -55,25 +47,22 @@ describe('Proxy Integration', () => {
     const response = await request(app)
       .post('/v1/messages')
       .send({
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-sonnet-4-5',
         max_tokens: 100,
         messages: [{ role: 'user', content: 'Say hello' }]
       });
 
     expect(response.status).toBe(200);
     expect(response.body).toBeDefined();
-    // Verify fetch was called (plugin made an upstream request)
     expect(mockFetch).toHaveBeenCalledTimes(1);
   });
 
-  test('should handle streaming request', async () => {
-    // Create a mock ReadableStream for SSE
+  test('should handle streaming request via anthropic protocol', async () => {
     const encoder = new TextEncoder();
     const chunks = [
-      'data: {"id":"chatcmpl-test","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":"Hello"},"finish_reason":null}]}\n\n',
-      'data: {"id":"chatcmpl-test","object":"chat.completion.chunk","choices":[{"index":0,"delta":{"content":" World"},"finish_reason":null}]}\n\n',
-      'data: {"id":"chatcmpl-test","object":"chat.completion.chunk","choices":[{"index":0,"delta":{},"finish_reason":"stop"}]}\n\n',
-      'data: [DONE]\n\n'
+      'event: content_block_delta\ndata: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":"Hello"}}\n\n',
+      'event: content_block_delta\ndata: {"type":"content_block_delta","index":0,"delta":{"type":"text_delta","text":" World"}}\n\n',
+      'event: message_stop\ndata: {"type":"message_stop"}\n\n'
     ];
 
     let chunkIndex = 0;
@@ -102,7 +91,7 @@ describe('Proxy Integration', () => {
     const response = await request(app)
       .post('/v1/messages')
       .send({
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-sonnet-4-5',
         max_tokens: 100,
         messages: [{ role: 'user', content: 'Say hello' }],
         stream: true
