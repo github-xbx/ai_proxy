@@ -1,4 +1,5 @@
 import fs from 'fs';
+import path from 'path';
 import yaml from 'yaml';
 import dotenv from 'dotenv';
 import { AppConfig, RouteConfig } from './types';
@@ -15,7 +16,14 @@ interface RawRouteConfig {
 }
 
 // 加载 .env 环境变量
-dotenv.config();
+// 优先从 exe 所在目录查找，再从 cwd 查找
+const exeDir = path.dirname(process.execPath);
+const exeEnvPath = path.join(exeDir, '.env');
+if (fs.existsSync(exeEnvPath)) {
+  dotenv.config({ path: exeEnvPath });
+} else {
+  dotenv.config();
+}
 
 /**
  * 配置管理器

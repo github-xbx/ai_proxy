@@ -9,7 +9,7 @@
 
 ; Installer attributes
 Name "${APP_NAME}"
-OutFile "ai-proxy-setup.exe"
+OutFile "..\release\installer\ai-proxy-setup.exe"
 InstallDir "$PROGRAMFILES\${APP_NAME}"
 InstallDirRegKey HKLM "Software\${APP_NAME}" "InstallDir"
 RequestExecutionLevel admin
@@ -46,7 +46,7 @@ VIAddVersionKey "LegalCopyright" "© ${APP_PUBLISHER}"
 Section "Install"
     SetOutPath "$INSTDIR"
 
-    ; Copy Node.js portable
+    ; Copy Node.js runtime
     File /r "build\node\*.*"
 
     ; Copy application files
@@ -54,7 +54,9 @@ Section "Install"
 
     ; Create .env if not exists
     IfFileExists "$INSTDIR\.env" env_exists
-    CopyFiles "$INSTDIR\.env.example" "$INSTDIR\.env"
+    FileOpen $0 "$INSTDIR\.env" w
+    FileWrite $0 "# DeepSeek API$\r$\nDEEPSEEK_API_KEY=$\r$\n$\r$\n# MiMo API$\r$\nMIMO_API_KEY=$\r$\n"
+    FileClose $0
     env_exists:
 
     ; Create uninstaller
