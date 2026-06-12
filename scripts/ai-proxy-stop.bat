@@ -7,26 +7,20 @@ echo   AI Proxy - Stop Service
 echo ========================================
 echo.
 
-if not exist .pid (
-    echo [WARN] .pid file not found. Service may not be running.
-    echo.
-    echo Trying to find node.exe processes...
-    tasklist /fi "imagename eq node.exe" /fo table | findstr /i "node"
-    echo.
-    echo To force stop all node processes: taskkill /IM node.exe /F
-    pause
-    exit /b 1
+:: Try to find and kill process on port 3000
+set FOUND=0
+for /f "tokens=5" %%a in ('netstat -ano ^| findstr ":3000 " ^| findstr "LISTENING"') do (
+    echo Stopping process PID: %%a
+    taskkill /PID %%a /F >nul 2>&1
+    set FOUND=1
 )
 
-set /p PID=< .pid
-echo Stopping AI Proxy (PID: %PID%)...
-taskkill /PID %PID% /F >nul 2>&1
-if %errorlevel% equ 0 (
+if %FOUND% equ 1 (
     echo [OK] Service stopped.
-    del .pid >nul 2>&1
+    if exist .pid del .pid >nul 2>&1
 ) else (
-    echo [WARN] Process %PID% not found. Service may have already stopped.
-    del .pid >nul 2>&1
+    echo [INFO] No running service found on port 3000.
+    if exist .pid del .pid >nul 2>&1
 )
 
 echo.

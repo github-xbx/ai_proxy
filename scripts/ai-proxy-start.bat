@@ -7,6 +7,20 @@ echo   AI Proxy Server
 echo ========================================
 echo.
 
+:: Check if port 3000 is already in use
+netstat -ano | findstr ":3000 " | findstr "LISTENING" >nul 2>&1
+if %errorlevel% equ 0 (
+    echo [WARN] Port 3000 is already in use.
+    echo.
+    echo Existing process:
+    netstat -ano | findstr ":3000 " | findstr "LISTENING"
+    echo.
+    echo Please stop the existing service first, or use ai-proxy-stop.bat
+    echo ========================================
+    pause
+    exit /b 1
+)
+
 echo Validating config...
 node ai-proxy.js --validate-only
 if %errorlevel% neq 0 (
