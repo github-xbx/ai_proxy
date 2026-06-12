@@ -54,6 +54,7 @@ echo [5/6] Copying config...
 xcopy /e /i /y config "%APP_DIR%\config" >nul
 copy installer\README.txt "%APP_DIR%\README.txt" >nul
 copy scripts\ai-proxy-start.bat "%APP_DIR%\ai-proxy-start.bat" >nul
+copy scripts\ai-proxy-stop.bat "%APP_DIR%\ai-proxy-stop.bat" >nul
 
 :: Build installer with NSIS
 echo [6/6] Building installer...

@@ -23,7 +23,6 @@ timeout /t 2 /nobreak >nul
 set PID=
 if exist .pid (
     set /p PID=< .pid
-    del .pid >nul 2>&1
 )
 echo.
 echo ========================================

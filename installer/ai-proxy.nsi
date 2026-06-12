@@ -65,6 +65,10 @@ Section "Install"
     ; Copy icon
     File "..\ai-proxy.ico"
 
+    ; Create shortcuts with icon in install directory
+    CreateShortCut "$INSTDIR\Start AI Proxy.lnk" "$INSTDIR\ai-proxy-start.bat" "" "$INSTDIR\ai-proxy.ico"
+    CreateShortCut "$INSTDIR\Stop AI Proxy.lnk" "$INSTDIR\ai-proxy-stop.bat" "" "$INSTDIR\ai-proxy.ico"
+
     ; Start menu shortcuts
     CreateDirectory "$SMPROGRAMS\${APP_NAME}"
     CreateShortCut "$SMPROGRAMS\${APP_NAME}\${APP_NAME}.lnk" "$INSTDIR\ai-proxy-start.bat" "" "$INSTDIR\ai-proxy.ico"
@@ -98,6 +102,8 @@ Section "Uninstall"
     ; Remove shortcuts
     RMDir /r "$SMPROGRAMS\${APP_NAME}"
     Delete "$DESKTOP\${APP_NAME}.lnk"
+    Delete "$INSTDIR\Start AI Proxy.lnk"
+    Delete "$INSTDIR\Stop AI Proxy.lnk"
 
     ; Remove registry keys
     DeleteRegKey HKLM "Software\Microsoft\Windows\CurrentVersion\Uninstall\${APP_NAME}"
